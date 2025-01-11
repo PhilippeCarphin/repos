@@ -70,19 +70,16 @@ def main():
         logger.info(f"Repo '{repo['path']}' deleted")
         # TODO: If repo-dir-scheme is URL and repo path is inside repo-dir,
         #       remove all empty directories up-to but excluding repo-dir.
-        if 'repo-dir' in d['config']:
-            logger.debug("Repo dir exists in config")
+        if 'repo-dir' in d['config'] and d['config'].get('repo-dir-scheme', None) == 'url':
             path = pathlib.Path(os.path.realpath(repo['path']))
             repo_dir = pathlib.Path(os.path.realpath(d['config']['repo-dir']))
-            logger.debug(f"Path of repo relative to repo-dir: {path.relative_to(repo_dir)}")
             for p in path.parents:
                 if p == repo_dir:
                     break
-                logger.debug(f"Doing p={p}")
                 try:
                     p.rmdir()
+                    logger.info(f"Removing directory '{p}'")
                 except OSError as e:
-                    logger.debug(f"Error: p={p}: {e}")
                     break
 
     except FileNotFoundError as e:
