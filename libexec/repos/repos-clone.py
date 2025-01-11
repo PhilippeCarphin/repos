@@ -101,7 +101,6 @@ def main():
     if args.dest:
         repo_dest = args.dest
         dest_creator = DirectoryCreator(os.path.dirname(repo_dest))
-        dest_creator.create()
         clone_command = ["git", "clone", args.url, repo_dest, *clone_args]
     else:
         if 'repo-dir' not in repo_dict['config']:
@@ -116,8 +115,6 @@ def main():
             clone_command = ["git", "clone", args.url, repo_dest, *clone_args]
             try:
                 dest_creator = DirectoryCreator(os.path.dirname(repo_dest))
-                dest_creator.create()
-                os.makedirs(os.path.dirname(repo_dest), exist_ok=True)
             except OSError as e:
                 logger.error(f"Could not create container directory: {e}")
                 return 1
