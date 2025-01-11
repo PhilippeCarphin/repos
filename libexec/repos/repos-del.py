@@ -35,6 +35,7 @@ def find_repo_by_path(repos, path):
     for name, repo in repos.items():
         if repo['path'] == path:
             return name, repo
+    return None, None
 
 def main():
     args = get_args()
