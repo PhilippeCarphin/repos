@@ -566,6 +566,17 @@ _repos_clone(){
     else
         __reassemble_comp_words_by_ref : words cword
     fi
+    if [[ "${cur}" == -* ]] ; then
+        COMPREPLY=($(compgen -W "-F --dest --name --debug" -- "${cur}") )
+        return;
+    fi
+
+    # Options that take arguments
+    case "${prev}" in
+        --dest) _filedir ; return ;;
+        --name) return ;;
+    esac
+
     compopt -o nospace
     compopt +o default
     _repos_complete_url ${words[cword]}
