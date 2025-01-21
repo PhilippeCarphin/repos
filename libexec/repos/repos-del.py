@@ -71,16 +71,16 @@ def main():
         # TODO: If repo-dir-scheme is URL and repo path is inside repo-dir,
         #       remove all empty directories up-to but excluding repo-dir.
         if 'repo-dir' in d['config'] and d['config'].get('repo-dir-scheme', None) == 'url':
-            path = pathlib.Path(os.path.realpath(repo['path']))
-            repo_dir = pathlib.Path(os.path.realpath(d['config']['repo-dir']))
-            for p in path.parents:
-                if p == repo_dir:
-                    break
-                try:
-                    p.rmdir()
-                    logger.info(f"Removing directory '{p}'")
-                except OSError as e:
-                    break
+            path = pathlib.Path(repo['path']).resolve()
+            repo_dir = pathlib.Path(d['config']['repo-dir']).resolve()
+            if path.is_relative_to(repo_dir):
+                rel = path.relative_to(repo_dir):
+                for p in rel.parents:
+                    try:
+                        p.rmdir()
+                        logger.info(f"Removing empty directory '{repo_dir.joinpath(p)}'")
+                    except OSError as e:
+                        break
 
     except FileNotFoundError as e:
         logger.info(f"Repo not found: {e}")
