@@ -744,7 +744,11 @@ func shouldPrint(args args, ri *repoInfo) (bool){
 		return true
 	}
 
-	return !ri.Config.Ignore && (ri.State.RemoteState.Ahead > 0 || ri.State.RemoteState.Behind > 0)
+	if (ri.State.RemoteState.Ahead > 0) || (ri.State.RemoteState.Behind > 0) {
+		return !ri.Config.Ignore || args.noignore
+	}
+
+	return false
 }
 
 
