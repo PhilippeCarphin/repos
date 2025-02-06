@@ -740,7 +740,8 @@ func shouldPrint(args args, ri *repoInfo) (bool){
 		return true
 	}
 
-	if ri.State.Dirty || (ri.State.UntrackedFiles != 0) || ri.State.StagedChanges {
+	if ri.State.Dirty || (ri.State.UntrackedFiles != 0) ||
+		(ri.State.UntrackedDirs != 0) || ri.State.StagedChanges {
 		return true
 	}
 
