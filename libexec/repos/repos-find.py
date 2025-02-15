@@ -87,25 +87,36 @@ def soft_update(original, new):
 
 def main():
     args = get_args()
-    repos = {}
+    # TODO: Should be just a list of paths
+    repos = []
     try:
         for d in args.dirs:
             if not os.path.isabs(d):
                 d = os.path.join(os.getcwd(), d)
-            repos.update(find_git_repos(d, args.recursive, args))
+            repos += find_git_repos(d, args.recursive, args)
     except KeyboardInterrupt:
         logger.info("KeyboardInterrupt, results so far:")
         yaml.dump({'repos': repos})
         return 130
     if args.merge:
+        clashes = []
         if not os.path.exists(args.repo_file):
             open(args.repo_file, 'w').write('repos: {}\n')
         with open(args.repo_file, 'r') as f:
             base_rf = yaml.safe_load(f)
-            for k in repos.keys():
+            for k,r in repos:
                 if k not in base_rf['repos']:
-                    logger.info(f"Adding repo '{k}' at path '{repos[k]['path']}'")
-                    base_rf['repos'][k] = repos[k]
+                    logger.info(f"Adding repo '{k}' at path '{r['path']}'")
+                    base_rf['repos'][k] = r
+                else:
+                    original_repo = base_rf['repos'][k]
+                    if os.path.realpath(original_repo['path']) != os.path.realpath(r['path']):
+                        if os.path.isdir(original_repo['path']):
+                            logger.warning(f"Repo under name '{k}' exists at path '{original_repo['path']}, not adding repo '{r['path']}'")
+                            clashes.append((k,r))
+                        else:
+                            logger.info(f"Repo under name '{k}' at path '{r['path']}' doesn't exist, replacing with '{r['path']}'")
+                            base_rf['repos'][k] = r
         if args.cleanup:
             for k in list(base_rf['repos'].keys()):
                 v = base_rf['repos'][k]
@@ -115,6 +126,9 @@ def main():
         with open(args.repo_file, 'w') as f:
             yaml.dump(base_rf, f)
     else:
-        print(yaml.dump({"repos": repos }))
+        import pprint
+        for k, v in repos:
+            print(f"{k}: {v['path']}")
+        # print(yaml.dump({"repos": repos }))
 
 sys.exit(main())
