@@ -47,6 +47,7 @@ type args struct {
 	subcommand     string
 	behind         bool
 	foreach        string
+	outputFormat   string
 	posargs        []string
 }
 
@@ -79,6 +80,7 @@ func getArgs() args {
 	flag.IntVar(&a.days, "days", 1, "Go back more than one day before yesterday when using option -recent")
 	flag.BoolVar(&a.all, "all", false, "Print all repos instead of just the onse with modifications")
 	flag.BoolVar(&a.noignore, "noignore", false, "Disregard the ignore flag on repos")
+	flag.StringVar(&a.outputFormat, "output-format", "ansi", "Output format, one of 'ansi', 'text', 'json'")
 
 	flag.Parse()
 	a.posargs = flag.Args()
@@ -477,13 +479,11 @@ func (rs RemoteState) String() string {
 		}
 	}
 }
-func (rs RemoteState) ReportString(n int) string {
+func (rs RemoteState) ReportString() string {
 	var s string
-	var format string
 	if rs.Ahead == -1 {
 		s = "UNKNOWN"
 	}
-	format = fmt.Sprintf("\033[1;35m%%%ds\033[0m",n)
 	if rs.Ahead > 0 && rs.Behind > 0 {
 		s = fmt.Sprintf("Diverged +%d-%d", rs.Ahead, rs.Behind)
 	} else {
@@ -492,65 +492,70 @@ func (rs RemoteState) ReportString(n int) string {
 		} else if rs.Behind > 0 {
 			s = fmt.Sprintf("Behind -%d", rs.Behind)
 		} else {
-			format = fmt.Sprintf("%%%ds",n)
 			s = fmt.Sprintf("Up to date")
 		}
 	}
-	return fmt.Sprintf(format, s)
+	return s
 }
 
-func printRepoInfoHeader(a args){
-	if a.branch {
-		fmt.Printf("REPO                         BRANCH               REMOTE STATE     STAGED            UNSTAGED     UNTRACKED     TSLC         COMMENT\n")
+func printRepoInfoHeader(printBranch bool){
+	if printBranch {
+		fmt.Printf("REPO                           BRANCH                REMOTE STATE     STAGED         UNSTAGED          UNTRACKED    TSLC       COMMENT\n")
 	} else {
-		fmt.Printf("REPO                          REMOTE STATE     STAGED            UNSTAGED     UNTRACKED     TSLC         COMMENT\n")
+		fmt.Printf("REPO                          REMOTE STATE     STAGED         UNSTAGED          UNTRACKED    TSLC       COMMENT\n")
 	}
 }
-func printRepoInfo(ri *repoInfo, a args) {
 
-	fmt.Printf("\033[;1m%-28s\033[0m", ri.Config.Name)
+func printRepoInfo(ri *repoInfo, ansiColor bool, printBranch bool) {
 
-	if a.branch {
-		fmt.Printf(" %-22s", ri.State.CurrentBranch)
+	var bold string
+	var reset string
+	var magenta string
+	var yellow string
+	var green string
+	var red string
+
+	// TODO: Make this function take a bool argument for colors
+	// and make the decision to pass true or false based on args
+	// at the call site
+	if ansiColor {
+		bold = "\033[;1m"
+		reset = "\033[0m"
+		magenta = "\033[35m"
+		yellow = "\033[33m"
+		green = "\033[32m"
+		red = "\033[31m"
 	}
-	// switch ri.State.RemoteState {
-	// case RemoteStateNormal:
-	// 	fmt.Printf("%11s ", "Up to Date")
-	// case RemoteStateBehind, RemoteStateAhead, RemoteStateDiverged:
-	// 	fmt.Printf("\033[1;35m%11v\033[0m ", ri.State.RemoteState)
-	// case RemoteStateUnknown:
-	// 	fmt.Printf("\033[1;37;41m%11v\033[0m  ", ri.State.RemoteState)
-	// }
-	fmt.Printf("%s", ri.State.RemoteState.ReportString(14))
+
+	fmt.Printf("%s%-30s%s", bold, ri.Config.Name, reset)
+
+	if printBranch {
+		fmt.Printf(" %-21s ", ri.State.CurrentBranch)
+	}
+
+	if ri.State.RemoteState.Ahead != 0 || ri.State.RemoteState.Behind != 0 {
+		fmt.Printf("%s%-14s%s", magenta, ri.State.RemoteState.ReportString(), reset)
+	} else {
+		fmt.Printf("%14s", "")
+	}
 
 	if ri.State.StagedChanges {
-		fmt.Printf(" \033[1;33m(%2df, +%-3d,-%-3d)\033[0m", ri.State.StagedFiles,  ri.State.StagedInsertions, ri.State.StagedDeletions)
+		fmt.Printf(" %s%s(%2df, +%-3d,-%-3d)%s", bold, yellow, ri.State.StagedFiles,  ri.State.StagedInsertions, ri.State.StagedDeletions, reset)
 	} else {
 		fmt.Printf("                 ")
 	}
 
 	if ri.State.Dirty {
-		fmt.Printf(" \033[33m(%2df, +%-3d,-%-3d)\033[0m", ri.State.Files, ri.State.Insertions, ri.State.Deletions)
+		fmt.Printf(" %s(%2df, +%-3d,-%-3d)%s ", yellow, ri.State.Files, ri.State.Insertions, ri.State.Deletions, reset)
 	} else {
-		fmt.Printf("                 ")
+		fmt.Printf("                  ")
 	}
-
-	/*
-	if ri.State.StagedChanges && ri.State.Dirty {
-		fmt.Printf(" \033[1;4;33m%-17s\033[0m ", "Staged & Unstaged")
-	} else if ri.State.StagedChanges {
-		fmt.Printf(" \033[1;33m%-17s\033[0m ", "Staged")
-	} else if ri.State.Dirty {
-		fmt.Printf(" \033[33m%-17s\033[0m ", "Unstaged")
-	} else {
-		fmt.Printf(" \033[32m%-17s\033[0m ", "Clean")
-	}
-	*/
 
 	if ri.State.UntrackedFiles != 0 || ri.State.UntrackedDirs != 0 {
-		fmt.Printf(" \033[1;31m%5dd,%df    \033[0m", ri.State.UntrackedDirs,  ri.State.UntrackedFiles)
+		s := fmt.Sprintf("%dd,%df", ri.State.UntrackedDirs, ri.State.UntrackedFiles)
+		fmt.Printf(" %s%s%-10s%s", bold, red, s, reset)
 	} else {
-		fmt.Printf(" \033[32m%5d        \033[0m", 0)
+		fmt.Printf(" %s          %s", green, reset)
 	}
 	fmt.Printf("   %-4d Hours", int(ri.State.TimeSinceLastCommit.Hours()))
 	fmt.Printf(" %s", ri.Config.Comment)
@@ -612,7 +617,7 @@ func main() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Config.getState ERROR: %v\n", err)
 		}
-		printRepoInfo(&ri, args)
+		printRepoInfo(&ri, args.outputFormat == "ansi" || args.outputFormat == "", args.branch)
 		return
 	}
 
@@ -717,11 +722,11 @@ func main() {
 			infoCh <- r
 		}(ri, &wg)
 	}
-	printRepoInfoHeader(args)
+	printRepoInfoHeader(args.branch)
 	go func(wg *sync.WaitGroup) {
 		for ri := range infoCh {
 			if shouldPrint(args, ri) {
-				printRepoInfo(ri, args)
+				printRepoInfo(ri, args.outputFormat == "ansi" || args.outputFormat == "", args.branch)
 			}
 			wg.Done()
 		}
