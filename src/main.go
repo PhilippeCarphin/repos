@@ -18,6 +18,7 @@ import (
 	"io/ioutil"
 
 	"gopkg.in/yaml.v2"
+	"encoding/json"
 )
 
 // RepoFile sucks
@@ -721,11 +722,22 @@ func main() {
 		}(ri)
 	}
 
-	printRepoInfoHeader(args.branch)
-	for i:= len(database) ; i > 0 ; i -= 1 {
-		ri := <- infoCh
-		if shouldPrint(args, ri) {
-			printRepoInfo(ri, args.outputFormat == "ansi" || args.outputFormat == "", args.branch)
+	if args.outputFormat == "json" {
+		for i:= len(database) ; i > 0 ; i -= 1 {
+			<- infoCh
+		}
+		j, err := json.Marshal(&database)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error marshalling JSON: %s\n", err)
+		}
+		os.Stdout.Write(j)
+	} else {
+		printRepoInfoHeader(args.branch)
+		for i:= len(database) ; i > 0 ; i -= 1 {
+			ri := <- infoCh
+			if shouldPrint(args, ri) {
+				printRepoInfo(ri, args.outputFormat == "ansi" || args.outputFormat == "", args.branch)
+			}
 		}
 	}
 	close(infoCh)
