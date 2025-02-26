@@ -134,7 +134,6 @@ __suggest_repos_key_r_values(){
     COMPREPLY+=( compgen -W "$(repos -list-names 2>/dev/null)" -- "${cur}" )
 }
 
-complete -F __complete_repos repos
 
 function expand_repo_dir(){
 
@@ -602,7 +601,13 @@ _repos_clone(){
     _repos_complete_url ${words[cword]}
 }
 
-complete -F _repo-del repo-del
+complete -F __complete_repos repos
+
+complete -F _repos_find repos-find
+complete -F _repos_ignore repos-ignore
+complete -F _repos_del repos-del repos-add repos-ignore
+complete -F _repos_comment repos-comment
+complete -F _repos_clone repos-clone
 
 complete -F _repo-ignore repo-ignore rign
 
