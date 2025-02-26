@@ -707,10 +707,8 @@ func main() {
 
 	sem := make(chan struct{}, args.njobs)
 	infoCh := make(chan *repoInfo)
-	var wg sync.WaitGroup
 	for _, ri := range database {
-		wg.Add(1)
-		go func(r *repoInfo, wg *sync.WaitGroup) {
+		go func(r *repoInfo) {
 			sem <- struct{}{}
 			defer func() { <-sem }()
 			var err error
@@ -720,23 +718,17 @@ func main() {
 				r.State.RemoteState = RemoteState{-1,-1}
 			}
 			infoCh <- r
-		}(ri, &wg)
+		}(ri)
 	}
-	printRepoInfoHeader(args.branch)
-	go func(wg *sync.WaitGroup) {
-		for ri := range infoCh {
-			if shouldPrint(args, ri) {
-				printRepoInfo(ri, args.outputFormat == "ansi" || args.outputFormat == "", args.branch)
-			}
-			wg.Done()
-		}
-	}(&wg)
 
-    /*
-     * Wait until wg.Done() has been called as many times as wg.Add(1)
-     * has been called.
-     */
-	wg.Wait()
+	printRepoInfoHeader(args.branch)
+	for i:= len(database) ; i > 0 ; i -= 1 {
+		ri := <- infoCh
+		if shouldPrint(args, ri) {
+			printRepoInfo(ri, args.outputFormat == "ansi" || args.outputFormat == "", args.branch)
+		}
+	}
+	close(infoCh)
 }
 
 func shouldPrint(args args, ri *repoInfo) (bool){
