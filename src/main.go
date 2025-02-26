@@ -132,7 +132,7 @@ type repoState struct {
 	StagedInsertions    int
 	StagedDeletions     int
 	StagedFiles         int
-	CurrentBranch       string
+	CurrentBranch       string // TODO Maybe there are some async concerns with this
 }
 
 type repos []repoConfig
