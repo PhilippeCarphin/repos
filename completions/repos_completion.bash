@@ -496,11 +496,21 @@ _repos_get_domains(){
 
     python3 -c "
 import yaml
+import os
+if not os.path.isfile('$f'):
+    sys.exit(1)
 with open('$f') as f:
-    conf = yaml.safe_load(f)['config']
-print('\n'.join(conf['domains'].keys()))
+    conf = yaml.safe_load(f)
+if 'config' in conf:
+    conf = conf['config']
+else:
+    sys.exit(1)
+
+if 'domains' in conf:
+    print('\n'.join(conf['domains'].keys()))
+
 if 'repo-dir-scheme' in conf and conf['repo-dir-scheme'] == 'url':
-    import os
+    # Subdirectories of ${repo_dir} are git hosting domains
     if 'repo-dir' in conf and os.path.isdir(conf['repo-dir']):
         print('\n'.join(os.listdir(conf['repo-dir'])))
 "
@@ -513,13 +523,23 @@ _repos_get_domain_users(){
 
     python3 -c "
 import yaml
+import os
+if not os.path.isfile('$f'):
+    sys.exit(1)
 with open('$f') as f:
-    conf = yaml.safe_load(f)['config']
-print('\n'.join(conf['domains']['$1']))
+    conf = yaml.safe_load(f)
+if 'config' in conf:
+    conf = conf['config']
+else:
+    sys.exit(1)
+
+if 'domains' in conf and '$1' in conf['domains']:
+    print('\n'.join(conf['domains']['$1']))
+
 if 'repo-dir-scheme' in conf and conf['repo-dir-scheme'] == 'url':
-    import os
     if 'repo-dir' in conf and os.path.isdir(conf['repo-dir']):
         d = os.path.join(conf['repo-dir'],'$1')
+        # Subdirectories of ${repo_dir}/${domain} are usernames/groups in that domain
         if os.path.isdir(d):
             print('\n'.join(os.listdir(d)))
 "
