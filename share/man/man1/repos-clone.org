@@ -1,0 +1,103 @@
+#+TITLE: repos-clone
+* NAME
+
+repos-clone - clone a repo into configured repo dir and add it to the config file
+
+* SYNOPSIS
+
+#+begin_src shell
+repos clone [-F CONFIG_FILE] [--name NAME] GIT_URL
+#+end_src
+
+* DESCRIPTION
+
+Clone =GIT_URL= into the configured repo-dir and add it to the config file.
+
+This command has sick autocomplete to help write =GIT_URL= super easily (the =_=
+represents the cursor):
+
+For
+#+begin_src shell
+repos clone _
+#+end_src
+the completion candidates are =git@= and =https://=
+
+For
+#+begin_src shell
+repos clone git@_
+#+end_src
+the completion candidates will be from two sources
+1. The domain names configured in the =config.domains= section of the config
+   file (See CONFIGURATION).
+2. If =config.repo-dir-scheme= is =url= in the config file, then
+   the subdirectories of =repo-dir= will be used as candidates for domains.
+when there is a single candidate, a =:= will be added after it for =git@= URLs
+and a =/= will be added after it for a =https://= URL.
+
+For
+#+begin_src shell
+repos clone git@github.com/_
+#+end_src
+the completion candidates will be from two sources
+1. The users configured in the =config.domains."github.com"= section of the config
+   file (See CONFIGURATION).
+2. If =config.repo-dir-scheme= is =url= in the config file, then
+   the subdirectories of =${repo_dir}/github.com= will be used as candidates for
+   usernames/groups.
+
+* CONFIGURATION
+
+A repos config file (default path =~/.config/repos.yml=) may have a config
+section to configure completion candidates using the =config.domains= object as
+shown here:
+
+#+begin_src yaml
+config:
+  color: true
+  domains:
+    github.com:
+      - philippecarphin
+      - torvalds
+      - ECCC-ASTD-MRD
+    gitlab.com:
+      - philippecarphin
+      - gitlab-org
+  repo-dir: /Users/pcarphin/Repositories
+  repo-dir-scheme: url
+repos:
+  # ...
+#+end_src
+
+With this example, completion candidates for domains will be
+- =github.com=
+- =gitlab.com=
+and when the URL to complete is =git@gitlab.com/=, completion candidates will be
+- =philippecarphin=
+- =gitlab-org=
+on the other hand if the URL to complete is =git@github.com=, then candidates
+will be
+- =philippecarphin=
+- =torvalds=
+- =ECCC-ASTD-MRD=
+
+The =config.repo-dir= and =config.repo-dir-scheme= also add sources for
+completion candidates as described in =DESCRIPTION= above.
+
+* EXAMPLE
+
+#+begin_src shell
+repos clone git@github.com:philippecarphin/emacs.d
+rcd emacs.d
+#+end_src
+
+* SEE ALSO
+
+Read this file online at
+
+#+begin_example
+https://gitlab.com/philippecarphin/repos/-/blob/master/repos-clone.org
+#+end_example
+
+* AUTHOR
+
+Philippe Carphin
