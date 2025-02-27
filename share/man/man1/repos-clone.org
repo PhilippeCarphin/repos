@@ -95,7 +95,7 @@ rcd emacs.d
 Read this file online at
 
 #+begin_example
-https://gitlab.com/philippecarphin/repos/-/blob/master/repos-clone.org
+https://gitlab.com/philippecarphin/repos/-/blob/master/share/man/man1/repos-clone.org
 #+end_example
 
 * AUTHOR
