@@ -74,7 +74,7 @@ def main():
             path = pathlib.Path(repo['path']).resolve()
             repo_dir = pathlib.Path(d['config']['repo-dir']).resolve()
             if path.is_relative_to(repo_dir):
-                rel = path.relative_to(repo_dir):
+                rel = path.relative_to(repo_dir)
                 for p in rel.parents:
                     try:
                         p.rmdir()
