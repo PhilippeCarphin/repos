@@ -3,8 +3,13 @@
 import http.server
 import argparse
 import subprocess
+import os
 
 DESCRIPTION = "Server for repos"
+repos_root = os.path.normpath(f"{os.path.dirname(__file__)}/..")
+
+content_types = {"css": "text/css", "html": "text/html", "json":
+                 "application/json", "js": "text/javascript"}
 
 def get_args():
     p = argparse.ArgumentParser(description=DESCRIPTION)
@@ -32,23 +37,61 @@ class MyServer(http.server.BaseHTTPRequestHandler):
             return False
         return True
 
+    def serve_viewer(self):
+        path=self.path.replace("..", "NOPE").replace("~", "Ah Ah Ah")
+        path = path[len("/repos-server/"):]
+        self.send_response(200)
+        ext = path.rsplit('.', 1)[-1]
+        self.send_header('Content-Type', content_types[ext])
+        self.end_headers()
+        fullpath = f"{repos_root}/share/repos/html/{path}"
+        if os.path.isfile(fullpath):
+            self.wfile.write(open(fullpath, 'rb').read())
+        else:
+            print("Requested file '{path}' not found")
+
     def do_OPTIONS(self):
         """Assume that requests with method GET are CORS preflight requests"""
+        print(f"Got an OPTIONS request")
         if not self.allow_origin():
             return
 
-        response_headers['Access-Control-Allow-Origin'] = self.headers['Origin']
-        response_headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
-        response_headers['Access-Control-Allow-Headers'] = 'X-PINGOTHER, Content-Type'
-        response_headers['Access-Control-Max-Age'] = '86400'
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', self.headers['Origin'])
+        self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'X-PINGOTHER, Content-Type')
+        self.send_header('Access-Control-Max-Age', '86400')
+        self.end_headers()
 
     def do_GET(self):
+        print(f"Piss path = '{self.path}'")
+        if self.path == "/repos-server" or self.path == "/repos-server/":
+            self.send_response(301)
+            self.send_header("Location", "/repos-server/viewer/repos.html")
+            self.end_headers()
+            return
+        # print(f"path = {self.path}")
+        if self.path.startswith("/repos-server/viewer"):
+            self.serve_viewer()
+            return
+
         if not self.allow_origin():
             return
-        self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
+
+        if self.path == "/repos-server/repos-data":
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            subprocess.run(
+                ["repos", "-j", "20", "-output-format", "json", "-branch"],
+                stdout=self.wfile
+            )
+            return
+
+        self.send_response(500)
+        self.send_header('Content-Type', 'text/html')
         self.end_headers()
-        subprocess.run(["repos", "-j", "20", "-output-format", "json"], stdout=self.wfile)
+        self.wfile.write(b'<H1>Unknown end point')
 
 
 try:

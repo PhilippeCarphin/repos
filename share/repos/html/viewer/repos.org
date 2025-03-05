@@ -1,0 +1,50 @@
+#+TITLE: The state of my repos
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="json.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="repos.css"/>
+#+HTML_HEAD: <script type="text/javascript" src="repos.js"></script>
+
+* This page shows the state of all the repos registered with my tool
+
+See the github project for the tool that generates the information:
+[[https://gitlab.com/philippecarphin/repos][repos]].  I haven't committed the javascript that works with it yet.
+
+Unless *All* is checked, only repos which have
+- Staged or unstaged changes
+- Untracked files
+- Are ahead or behind relative to their remote
+are shown.
+
+Some repos can have the =ignore= flag.  This means that just being ahead or
+behind is not enough for them to be shown in the report.  This is for open
+source projects that I do no work on.  The name =ignore-remote= would probably
+be better.
+
+If *Show All* is checked, all repos are shown regardless of *Show Ignored*.
+
+#+begin_export html
+<label for="coding">
+    <input type="checkbox" id="repos-control-all" name="interest" value="coding" />
+    Show all
+</label>
+<label for="music">
+    <input type="checkbox" id="repos-control-ignore" name="interest" value="music" />
+    Show Ignored
+</label>
+#+end_export
+#+begin_export html
+<p> Click the button to <button type="button" onclick="reposServerRequest()">Launch It!</button></p>
+<table id="repos-table">
+  <tr>
+    <th>Repo name</th>
+    <th>Branch</th>
+    <th>Remote State</th>
+    <th>Unstaged Changes</th>
+    <th>Staged Changes</th>
+    <th>Untracked Dirs/Files</th>
+    <th>Time Since Last Commit</th>
+  </tr>
+  <tbody id="repos-table-body"> </tbody>
+</table>
+<pre id="repos-server-response"> repos server response </pre>
+#+end_export

@@ -1,0 +1,45 @@
+#repos-table {
+    background-color: #dddddd;
+    border:   solid black 1px;
+    border-spacing: 10px;
+    font-size: small;
+}
+#content {
+    max-width: 1000px;
+}
+.outline-text-2 {
+    max-width: 800px;
+}
+
+.repo-name {
+    color: black;
+    font-weight: bold
+}
+
+.repo-remote-state {
+    color: magenta;
+    font-weight: bold;
+}
+
+.repo-staged-changes {
+    color: darkorange;
+    font-weight: bold;
+}
+
+.repo-unstaged-changes {
+    color: darkorange
+}
+
+.repo-untracked-files {
+    color: red;
+    font-weight: bold;
+}
+
+.repo-branch {
+    color: darkgreen;
+}
+
+.repo-hash {
+    color: darkred;
+    font-weight: bold;
+}
