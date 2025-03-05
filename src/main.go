@@ -492,8 +492,8 @@ func (rs RemoteState) ReportString() string {
 			s = fmt.Sprintf("Ahead +%d", rs.Ahead)
 		} else if rs.Behind > 0 {
 			s = fmt.Sprintf("Behind -%d", rs.Behind)
-		} else {
-			s = fmt.Sprintf("Up to date")
+		} else if rs.Ahead < 0 || rs.Behind < 0 {
+			s = fmt.Sprintf("???")
 		}
 	}
 	return s
