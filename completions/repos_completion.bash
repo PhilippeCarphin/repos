@@ -145,7 +145,7 @@ function expand_repo_dir(){
     shift
 
     local repo_dir
-    if ! repo_dir=$(repos -get-dir ${repo_name} "$@" 2>/dev/null) ; then
+    if ! repo_dir=$(repos "${repo_file[@]}" -get-dir ${repo_name} "$@" 2>/dev/null) ; then
         return 1
     fi
 
@@ -153,7 +153,9 @@ function expand_repo_dir(){
 }
 
 function rcd(){
+    local repo_file=()
     case $1 in
+        -F) repo_file=(-F $2) ; shift ; shift ;;
         --help) man ${FUNCNAME[0]} ; return ;;
         -h)
         echo "rcd : 'repos-cd' is a shell function to cd to repos
@@ -344,19 +346,42 @@ __has_contents(){
 
 
 __complete_rcd(){
+    # local cur="${COMP_WORDS[COMP_CWORD]}"
+    # local prev="${COMP_WORDS[COMP_CWORD-1]}"
+    local cur prev words cword
+    local repo_file
+    _init_completion || return 1
+    if [[ "${prev}" == "-F" ]] ; then
+        _filedir
+        return
+    fi
     __complete_rcd_internal
 }
 
-
+__complete_rcd_get_file(){
+    for((i=1;i<cword;i++)) ; do
+        if [[ ${words[i]} == -F ]] ; then
+            local file=${words[i+1]}
+            __expand_tilde_by_ref file
+            echo ${file}
+            return
+        fi
+    done
+}
 
 __complete_rcd_internal(){
+    # When called by __complete_orcd
     local repo_file=()
     if [[ -n "$1" ]] ; then
         repo_file=(-F "$1")
+    else
+        local F_arg="$(__complete_rcd_get_file)"
+        if [[ -n "${F_arg}" ]] ; then
+            repo_file=(-F "${F_arg}")
+        fi
     fi
 
     COMPREPLY=()
-    local cur="${COMP_WORDS[COMP_CWORD]}"
 
     compopt -o nospace
     if [[ "${cur}" != */* ]] ; then
