@@ -23,6 +23,8 @@ def get_args():
 
 class MyServer(http.server.BaseHTTPRequestHandler):
     def allow_origin(self):
+        if "*" in args.allowed_origins:
+            return True
         if self.headers.get('Sec-Fetch-Site', "") == "same-origin":
             return True
         else:
@@ -64,8 +66,7 @@ class MyServer(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        print(f"Piss path = '{self.path}'")
-        if self.path == "/repos-server" or self.path == "/repos-server/":
+        if self.path in ["/repos-server", "/repos-server/", "/"]:
             self.send_response(301)
             self.send_header("Location", "/repos-server/viewer/repos.html")
             self.end_headers()

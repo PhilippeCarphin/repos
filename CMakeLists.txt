@@ -42,6 +42,8 @@ install(
     PATTERN .* EXCLUDE
 )
 
+install(DIRECTORY share/repos/html/viewer/ DESTINATION share/repos/html/viewer)
+
 install(
     FILES
         completions/repos_completion.bash
