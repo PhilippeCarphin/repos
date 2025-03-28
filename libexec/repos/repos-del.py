@@ -17,6 +17,13 @@ Delete a repo from disc and from the repos config file.  NOTE: Although this
 tool performs some checks to prevent work from being lost, only use it if you
 would be willing to rm -rf the repo."""
 
+if sys.version_info.minor < 9:
+    def is_relative_to(p, other):
+        # https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.is_relative_to
+        # The method is_relative_to of pathlib.Path objects
+        return other == p or other in p.parents
+    setattr(pathlib.Path, "is_relative_to", is_relative_to)
+
 def get_args():
     p = argparse.ArgumentParser(description=DESCRIPTION)
     p.add_argument("-F", help="Specify alternate file to ~/.config/repos.yml")
@@ -41,9 +48,9 @@ def main():
     args = get_args()
     repo_file = args.F if args.F else os.path.expanduser("~/.config/repos.yml")
     with open(repo_file) as y:
-        d = yaml.safe_load(y)
+        config = yaml.safe_load(y)
 
-    repos = d['repos']
+    repos = config['repos']
     if not args.name:
         if not args.path:
             name, repo = find_repo_by_path(repos, os.environ['PWD']) or find_repo_by_path(repos, os.getcwd())
@@ -68,19 +75,7 @@ def main():
             return 0
         shutil.rmtree(repo['path'])
         logger.info(f"Repo '{repo['path']}' deleted")
-        # TODO: If repo-dir-scheme is URL and repo path is inside repo-dir,
-        #       remove all empty directories up-to but excluding repo-dir.
-        if 'repo-dir' in d['config'] and d['config'].get('repo-dir-scheme', None) == 'url':
-            path = pathlib.Path(repo['path']).resolve()
-            repo_dir = pathlib.Path(d['config']['repo-dir']).resolve()
-            if path.is_relative_to(repo_dir):
-                rel = path.relative_to(repo_dir)
-                for p in rel.parents:
-                    try:
-                        p.rmdir()
-                        logger.info(f"Removing empty directory '{repo_dir.joinpath(p)}'")
-                    except OSError as e:
-                        break
+        rmdir_empty_parents(config,repo)
 
     except FileNotFoundError as e:
         logger.info(f"Repo not found: {e}")
@@ -91,6 +86,21 @@ def main():
         yaml.dump(d,y)
 
     logger.info(f"Repo removed from repo_file '{repo_file}'")
+
+def rmdir_empty_parents(config, repo)
+    if 'repo-dir' in config['config'] and config['config'].get('repo-dir-scheme', None) == 'url':
+        path = pathlib.Path(repo['path']).resolve()
+        repo_dir = pathlib.Path(config['config']['repo-dir']).resolve()
+        if path.is_relative_to(repo_dir):
+            rel = path.relative_to(repo_dir)
+            logger.debug(f"Path of repo relative to repo-dir: {rel}")
+            for p in rel.parents:
+                try:
+                    to_delete = repo_dir.joinpath(p)
+                    to_delete.rmdir()
+                    logger.info(f"Removed empty directory '{to_delete}'")
+                except OSError as e:
+                    break
 
 def can_erase(repo):
     result = True
