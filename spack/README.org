@@ -1,0 +1,37 @@
+#+TITLE: Spack package
+
+Every time I try to do something with Spack, I forget it by the time I want to
+do something again.  So here I'm saving what I did for this package so I can
+refer to it next time.
+
+* Creation
+
+#+begin_src shell
+spack create --name repos --template cmake
+#+end_src
+
+creates a directory =${SPACK_REPO}/var/spack/repos/builtin/packages/repos=
+containing a file =package.py= with some =FIXME= comments indicating a few
+things to change.
+
+Notes:
+- To have it build from the source in the git repo, we need to have a =git=
+  class attribute.
+- We need to list the dependencies with =depends_on()= calls
+- We need to set a version but I'm not sure what it does with this because I
+  tried it with a version that does not exist and it still worked.
+
+Look at other =package.py= from other repos which also have a ~git = ...~.
+
+* Installation
+
+Doing =spack install repos= will build and install the package but will not make
+it available.
+
+* Using it
+
+#+begin_src shell
+spacktivate SOME-ENV
+spack add repos
+spack install # or spack install repos
+#+end_src
