@@ -44,6 +44,15 @@ the completion candidates will be from two sources
 2. If =config.repo-dir-scheme= is =url= in the config file, then
    the subdirectories of =${repo_dir}/github.com= will be used as candidates for
    usernames/groups.
+* OPTIONS
+
+** ~--name~
+
+Set the name of the repo in the repo config file.
+
+** ~-F~
+
+Use an alternate config file than the default of =~/.config/repos.yml=.
 
 * CONFIGURATION
 
