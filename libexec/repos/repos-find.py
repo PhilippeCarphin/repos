@@ -57,11 +57,16 @@ def is_git_repo(path):
 
     return False
 
-def find_git_repos(directory, recurse, args):
+def find_git_repos_in(directory, recurse, args):
     logger.debug(f"Doing directory {directory}")
     try:
         contents = os.listdir(directory)
     except PermissionError:
+        return
+    except NotADirectoryError:
+        return
+    except FileNotFoundError as e:
+        logger.warn(f"FileNotFoundError: {e}")
         return
 
     dirs = filter(lambda c: not c.startswith("."), contents)
@@ -80,7 +85,7 @@ def find_git_repos(directory, recurse, args):
             yield (name, {'path': os.path.normpath(abs_dir)})
         elif recurse:
             logger.debug(f"Recursing into directory {d}")
-            yield from find_git_repos(os.path.join(directory, d), recurse, args)
+            yield from find_git_repos_in(os.path.join(directory, d), recurse, args)
 
 def soft_update(original, new):
     """ Update original with keys that are in new but not already in original """
@@ -93,7 +98,13 @@ def main():
         for d in args.dirs:
             if not os.path.isabs(d):
                 d = os.path.join(os.getcwd(), d)
-            repos += find_git_repos(d, args.recursive, args)
+            if is_git_repo(d):
+                # find_git_repos_in checks if the the directory *contains* git repos
+                # but not if the directory itself is a git repo.  This could be
+                # made more elegant.
+                repos.append((os.path.basename(d), {"path": d}))
+            else:
+                repos += find_git_repos_in(d, args.recursive, args)
     except KeyboardInterrupt:
         logger.info("KeyboardInterrupt, results so far:")
         yaml.dump({'repos': repos})
