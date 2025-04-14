@@ -80,14 +80,14 @@ def main():
     except FileNotFoundError as e:
         logger.info(f"Repo not found: {e}")
 
-    del d['repos'][args.name]
+    del config['repos'][args.name]
 
     with open(repo_file, 'w') as y:
-        yaml.dump(d,y)
+        yaml.dump(config,y)
 
     logger.info(f"Repo removed from repo_file '{repo_file}'")
 
-def rmdir_empty_parents(config, repo)
+def rmdir_empty_parents(config, repo):
     if 'repo-dir' in config['config'] and config['config'].get('repo-dir-scheme', None) == 'url':
         path = pathlib.Path(repo['path']).resolve()
         repo_dir = pathlib.Path(config['config']['repo-dir']).resolve()
