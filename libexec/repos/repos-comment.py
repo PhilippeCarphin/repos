@@ -9,7 +9,7 @@ import _repos_base
 
 logger = _repos_logging.logger
 
-def get_args():
+def arg_parser():
     p = argparse.ArgumentParser(description="Set the ignore flag of a repo to true")
     p.add_argument("-F", help="Specify alternate file to ~/.config/repos.yml")
     p.add_argument("--name", help="Specify name for repo in config file.  Defaults to basename(os.getcwd())")
@@ -18,11 +18,10 @@ def get_args():
     action.add_argument("--get", help="Get comment for repo", action='store_true')
     action.add_argument("--set", help="Set comment for repo", metavar='COMMENT')
     action.add_argument("--clear", help="Remove comment from repo", action='store_true')
-    args = p.parse_args()
-    return args
+    return p
 
 def main():
-    args = get_args()
+    args = arg_parser().parser_args()
     if args.debug:
         logger.setLevel(logging.DEBUG)
     repo_file = args.F if args.F else os.path.expanduser("~/.config/repos.yml")
@@ -71,6 +70,7 @@ def main():
             logger.error("The repo '{args.name}' has no comment", file=sys.stderr)
             return 1
 
-sys.exit(main())
+if __name__ == "__main__":
+    sys.exit(main())
 
 

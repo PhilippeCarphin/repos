@@ -22,24 +22,25 @@ def complete_users(protocol, domain, user_prefix):
                 print(f"{u}/")
 
 
-to_complete=sys.argv[1]
-if to_complete.startswith("git@"):
-    protocol = "git@"
-    domain_user_sep = ':'
-elif to_complete.startswith("https://"):
-    protocol = "https://"
-    domain_user_sep = '/'
-else:
-    if "git@".startswith(to_complete):
-        print("git@")
-    if "https://".startswith(to_complete):
-        print("https://")
-    sys.exit(0)
+if __name__ == "__main__":
+    to_complete=sys.argv[1]
+    if to_complete.startswith("git@"):
+        protocol = "git@"
+        domain_user_sep = ':'
+    elif to_complete.startswith("https://"):
+        protocol = "https://"
+        domain_user_sep = '/'
+    else:
+        if "git@".startswith(to_complete):
+            print("git@")
+        if "https://".startswith(to_complete):
+            print("https://")
+        sys.exit(0)
 
-rest = to_complete[len(protocol):]
-if domain_user_sep in rest:
-    domain, rest = rest.split(domain_user_sep, 1)
-    if '/' not in rest:
-        complete_users(protocol, domain, rest)
-else:
-    complete_domains(protocol, rest)
+    rest = to_complete[len(protocol):]
+    if domain_user_sep in rest:
+        domain, rest = rest.split(domain_user_sep, 1)
+        if '/' not in rest:
+            complete_users(protocol, domain, rest)
+    else:
+        complete_domains(protocol, rest)

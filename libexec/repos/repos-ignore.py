@@ -10,13 +10,16 @@ import _repos_base
 
 logger = _repos_logging.logger
 
-def get_args():
+def arg_parser():
     p = argparse.ArgumentParser(description="Set the ignore flag of a repo to true")
     p.add_argument("-F", help="Specify alternate file to ~/.config/repos.yml")
     p.add_argument("--name", help="Specify name for repo in config file.  Defaults to basename(os.getcwd())")
     p.add_argument("--unignore", help="Unignore the repo", action='store_true')
     p.add_argument("--debug", action='store_true')
-    args = p.parse_args()
+    return p
+
+def get_args():
+    args = arg_parser().parse_args()
     if args.debug:
         logger.setLevel(logging.DEBUG)
     return args
@@ -55,6 +58,7 @@ def main():
     with open(repo_file, 'w') as f:
         yaml.dump(database, f)
 
-sys.exit(main())
+if __name__ == "__main__":
+    sys.exit(main())
 
 

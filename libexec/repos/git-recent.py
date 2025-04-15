@@ -6,11 +6,14 @@ import subprocess
 from pprint import pprint
 import argparse
 
-def main():
+def arg_parser():
     p = argparse.ArgumentParser(description="Print today and yesterday's commits for a git repo")
     p.add_argument("--days", "-d", default=1, help="Number of days to go before yesterday")
     p.add_argument("--all", "-a", action='store_true', help="Check recent commits for all branches")
-    args = p.parse_args()
+    return p
+
+def main():
+    args = arg_parser().parse_args()
     repo_dir = os.getcwd()
     repo = Repo(repo_dir)
     try:

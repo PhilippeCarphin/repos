@@ -8,12 +8,15 @@ import _repos_logging
 
 logger = _repos_logging.logger
 
-def get_args():
+def arg_parser():
     p = argparse.ArgumentParser(description="Add a repo to the repos.yml config file")
 
     p.add_argument("-F", help="Specify alternate file to ~/.config/repos.yml")
     p.add_argument("repo", help="Specify the repository, defaults to $PWD", nargs='?')
     p.add_argument("--name", help="Specify name for repo in config file")
+    return p
+def get_args():
+    p = arg_parser()
 
     if "FROM_REPOS" in os.environ:
         logger.debug(f"Called by repos executable by doing 'repos add'")

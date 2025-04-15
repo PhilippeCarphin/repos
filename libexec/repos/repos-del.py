@@ -24,12 +24,15 @@ if sys.version_info.minor < 9:
         return other == p or other in p.parents
     setattr(pathlib.Path, "is_relative_to", is_relative_to)
 
-def get_args():
+def arg_parser():
     p = argparse.ArgumentParser(description=DESCRIPTION)
     p.add_argument("-F", help="Specify alternate file to ~/.config/repos.yml")
     p.add_argument("--path", help="Specify the repository, defaults to $PWD", nargs='?')
     p.add_argument("--name", help="Specify name for repo in config file")
     p.add_argument("--debug", action='store_true')
+    return p
+def get_args():
+    p = arg_parser()
 
     args = p.parse_args()
 
@@ -131,7 +134,8 @@ def can_erase(repo):
 
     return result
 
-sys.exit(main())
+if __name__ == "__main__":
+    sys.exit(main())
 
 
 

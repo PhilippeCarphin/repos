@@ -10,7 +10,7 @@ import logging
 
 logger = _repos_logging.logger
 
-def get_args():
+def arg_parser():
     p = argparse.ArgumentParser(description="Find git repos recursively and produce YAML code for ~/.config/repos.yml on STDOUT.  Use the --merge option to merge the results into the config file")
     p.add_argument("dirs", nargs='*', default=[os.getcwd()], help="Directories to search.  Searches PWD if none are specified")
     p.add_argument("--recursive", action='store_true', help="Search recursively")
@@ -21,7 +21,11 @@ def get_args():
     p.add_argument("--include", help="Regular expression to include")
     p.add_argument("--cleanup", action='store_true', help="Remove repos that don't exist anymore.  Only valid when using the --merge option")
 
-    args = p.parse_args()
+    return p
+
+def get_args():
+    args = arg_parser().parse_args()
+
     if args.exclude:
         if '/' in args.exclude:
             logger.warning("--exclude pattern contains a '/' but pattern is used to match on path components")
@@ -142,4 +146,5 @@ def main():
             print(f"{k}: {v['path']}")
         # print(yaml.dump({"repos": repos }))
 
-sys.exit(main())
+if __name__ == "__main__":
+    sys.exit(main())

@@ -15,7 +15,7 @@ logger = _repos_logging.logger
 class RepoError(Exception):
     pass
 
-def get_args():
+def arg_parser():
     p = argparse.ArgumentParser(description="Clone a git repo into repository tree and add it to repo file")
 
     p.add_argument("-F", help="Specify alternate file to ~/.config/repos.yml")
@@ -23,6 +23,11 @@ def get_args():
     p.add_argument("--dest", help="Destination")
     p.add_argument("--name", help="Specify name for repo in config file")
     p.add_argument("--debug", action='store_true')
+
+    return p
+
+def get_args():
+    p = arg_parser()
 
     if "FROM_REPOS" in os.environ:
         logger.debug(f"Called by repos executable by doing 'repos clone'")
