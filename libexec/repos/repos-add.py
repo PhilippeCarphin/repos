@@ -55,7 +55,7 @@ def main(args):
     #
     # Check that it is a git repo by checking for a .git directory
     #
-    if not os.path.isdir(os.path.join(args.repo, '.git')):
+    if not (os.path.isdir(os.path.join(args.repo, '.git')) or os.path.isfile(os.path.join(args.repo, '.git'))):
         logger.error(f"It seems repo '{args.repo}' is not a git repository, skipping ...")
         return 1
 
