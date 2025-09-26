@@ -141,10 +141,10 @@ def main():
         with open(args.repo_file, 'w') as f:
             yaml.dump(base_rf, f)
     else:
-        import pprint
-        for k, v in repos:
-            print(f"{k}: {v['path']}")
-        # print(yaml.dump({"repos": repos }))
+        if repos:
+            print("repos:")
+            for k, v in repos:
+                print(f"  {k}: {{path: {v['path']}}}")
 
 if __name__ == "__main__":
     sys.exit(main())
