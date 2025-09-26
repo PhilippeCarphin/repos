@@ -521,6 +521,7 @@ _repos_get_domains(){
     python3 -c "
 import yaml
 import os
+import sys
 if not os.path.isfile('$f'):
     sys.exit(1)
 with open('$f') as f:
