@@ -311,7 +311,17 @@ func readDatabase(filename string) ([]*repoInfo, *config, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	yaml.Unmarshal(yml, &repoFile)
+	err = yaml.Unmarshal(yml, &repoFile)
+	if err != nil {
+		switch err.(type){
+		case *yaml.TypeError:
+			fmt.Fprintf(os.Stderr, "Error creating internal structs from valid YAML: %s: %v\n", filename, err)
+			fmt.Fprintf(os.Stderr, "Config file contains valid YAML syntax but does not define the right objects\n")
+			fmt.Fprintf(os.Stderr, "Run repos [-F CONFIG_FILE] check (which does not exist yet)\n")
+		default:
+			fmt.Fprintf(os.Stderr, "Error parsing %s: %#v\n", filename, err)
+		}
+	}
 
 	database := make([]*repoInfo, 0, len(repoFile.Repos)+8)
 	for name, rp := range repoFile.Repos {
