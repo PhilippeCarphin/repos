@@ -21,7 +21,7 @@ def arg_parser():
     return p
 
 def main():
-    args = arg_parser().parser_args()
+    args = arg_parser().parse_args()
     if args.debug:
         logger.setLevel(logging.DEBUG)
     repo_file = args.F if args.F else os.path.expanduser("~/.config/repos.yml")
