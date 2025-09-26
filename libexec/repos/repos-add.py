@@ -63,7 +63,7 @@ def main(args):
     # Check if the repo is already there
     #
     if args.name in repo_dict['repos']:
-        logger.info(f"Repo '{args.repo}' is already in '{repo_file}' under name '{args.name}' skipping ...")
+        logger.warn(f"Repo '{args.repo}' is already in '{repo_file}' under name '{args.name}' skipping ...")
         return 0
 
     #
