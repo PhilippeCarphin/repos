@@ -518,7 +518,7 @@ _repos_get_domains(){
         return 1
     fi
 
-    python3 -c "
+    if ! python3 -c "
 import yaml
 import os
 import sys
@@ -538,7 +538,9 @@ if 'repo-dir-scheme' in conf and conf['repo-dir-scheme'] == 'url':
     # Subdirectories of ${repo_dir} are git hosting domains
     if 'repo-dir' in conf and os.path.isdir(conf['repo-dir']):
         print('\n'.join(os.listdir(conf['repo-dir'])))
-"
+" 2>/dev/null ; then
+        printf "\nINFO: python package pyyaml required for domain completion\n%s%s" "${PS1@P}" "${COMP_LINE}" >&2
+    fi
 }
 _repos_get_domain_users(){
     local f=~/.config/repos.yml
@@ -546,9 +548,10 @@ _repos_get_domain_users(){
         return 1
     fi
 
-    python3 -c "
+    if ! python3 -c "
 import yaml
 import os
+import sys
 if not os.path.isfile('$f'):
     sys.exit(1)
 with open('$f') as f:
@@ -567,7 +570,9 @@ if 'repo-dir-scheme' in conf and conf['repo-dir-scheme'] == 'url':
         # Subdirectories of ${repo_dir}/${domain} are usernames/groups in that domain
         if os.path.isdir(d):
             print('\n'.join(os.listdir(d)))
-"
+" 2>/dev/null ; then
+        printf "\nINFO: python package pyyaml required for user completion\n%s%s" "${PS1@P}" "${COMP_LINE}" >&2
+    fi
 }
 _repos_complete_url(){
 
