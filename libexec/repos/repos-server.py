@@ -53,7 +53,7 @@ class MyServer(http.server.BaseHTTPRequestHandler):
         if os.path.isfile(fullpath):
             self.wfile.write(open(fullpath, 'rb').read())
         else:
-            print("Requested file '{path}' not found")
+            print(f"Requested file '{path}' not found")
 
     def do_OPTIONS(self):
         """Assume that requests with method GET are CORS preflight requests"""
