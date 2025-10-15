@@ -19,6 +19,8 @@ def get_args():
     args = p.parse_args()
     if args.allowed_origins:
         args.allowed_origins = args.allowed_origins.split(",")
+    else:
+        args.allowed_origins = []
     return args
 
 class MyServer(http.server.BaseHTTPRequestHandler):
@@ -33,7 +35,8 @@ class MyServer(http.server.BaseHTTPRequestHandler):
             print(f"Refusing because: Origin not in self.headers: \n\033[36m{str(self.headers).strip()}\033[0m")
             self.send_response(403)
             return False
-        if args.allowed_origins and self.headers['Origin'] not in args.allowed_origins:
+
+        if self.headers['Origin'] not in args.allowed_origins:
             print(f"Refusing because origin: {self.headers['Origin']} not in allowed origins: {args.allowed_origins}")
             self.send_response(403)
             return False
