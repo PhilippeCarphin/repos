@@ -342,7 +342,7 @@ func (r repoConfig) fetch() error {
 		return fmt.Errorf("error encountered when attempting to fetch '%s'", r.Path)
 	}
 	if ! cmd.ProcessState.Success() {
-		return fmt.Errorf("fetch command failed for repo '%s' : %v", r.Path, cmd.ProcessState.ExitCode())
+		return fmt.Errorf("fetch command failed for repo  '%s': %v", r.Name, cmd.ProcessState.ExitCode())
 	}
 	return nil
 }
